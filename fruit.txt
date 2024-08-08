@@ -1,0 +1,10 @@
+ 1111 apple 100 10
+ 2222 kiwi 500 10
+ 3333 guava 150 15
+ 4444 peach 120 19
+ 5555 berry 50 5
+ 6666 pear 200 20
+ 7777 papaya 1000 5
+ 8888 cherry 1500 4
+ 
+ 9999 grapes 400 12

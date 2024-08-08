@@ -1,0 +1,10 @@
+ 1212 tomato 40 5
+ 1313 brinjal 80 20
+ 1414 cabbage 60 2
+ 1515 carrot 10 5
+ 1616 onion 170 7
+ 1717 spinach 500 2
+ 1818 peas 300 5
+ 1919 pumpkin 600 20
+ 2020 garlic 90 1
+ 2121 ginger 70 8

@@ -1,0 +1,1147 @@
+#include<iostream>
+#include<fstream>
+using namespace std;
+class Superstore;
+void start();
+class Cart;
+class customer;
+class customerchild;
+class Product {
+public:
+	int Barcode;
+	string productName;
+	int ProductQuantity;
+	float Productprice;
+	int discount;
+
+	Product() : Barcode(0), productName(""), ProductQuantity(0), Productprice(0.0), discount(0) {}
+	Product(int Pcode, const std::string& Pname, int Pquantity, float Pprice, int Pdiscount)
+		: Barcode(Pcode), productName(Pname), ProductQuantity(Pquantity), Productprice(Pprice), discount(Pdiscount) {}
+
+	friend ostream& operator<<(ostream& os, const Product& product)
+	{
+		os << product.Barcode << "\t\t" << product.productName << "\t\t" << product.Productprice << "\t\t" << product.ProductQuantity << "\t\t" << product.ProductQuantity * product.Productprice << "\t" << (product.ProductQuantity * product.Productprice) - ((product.ProductQuantity * product.Productprice) * product.discount / 100) << endl;
+		return os;
+	}
+};
+
+
+
+class categories
+{
+public:
+	virtual void display() = 0;
+	virtual void add() = 0;
+	virtual void Modify() = 0;
+	virtual void Delete() = 0;
+};
+
+class fruits :public Product, public categories {
+public:
+
+	float discount;
+	fruits()
+	{
+		Barcode = 0;
+		productName = "";
+		ProductQuantity = 0;
+		Productprice = 0;
+		discount = 0;
+	}
+	fruits(int b, string n, float p, int q)
+	{
+		Barcode = b;
+		productName = n;
+		ProductQuantity = q;
+		Productprice = p;
+
+	}
+	void add() {
+		fstream FRUITY;
+		int c;
+		int token = 0;
+		float p;
+		float d;
+		string n;
+
+		cout << "\n\n\t\t\t Add new fruit";
+		cout << "\n\n\t Product code of the fruit: ";
+		cin >> Barcode;
+		cout << "\n\n\t Name of the fruit: ";
+		cin >> productName;
+		cout << "\n\n\t Price of the fruit: ";
+		cin >> Productprice;
+		cout << "\n\n\t Discount on fruit: ";
+		cin >> discount;
+
+		FRUITY.open("fruit.txt", ios::in);
+
+		if (!FRUITY) {
+			FRUITY.open("fruit.txt", ios::app | ios::out);
+			FRUITY << " " << Barcode << " " << productName << " " << Productprice << " " << discount << "\n";
+			FRUITY.close();
+		}
+		else {
+			FRUITY >> c >> n >> p >> d;
+			while (!FRUITY.eof()) {
+				if (c == Barcode || n == productName) {
+					token++;
+				}
+				FRUITY >> c >> n >> p >> d;
+			}
+
+			FRUITY.close();
+			if (token == 1) {
+				cout << "\n\n\t\t Product with the same code already exists!";
+				return;
+			}
+			else {
+				FRUITY.open("fruit.txt", ios::app | ios::out);
+				FRUITY << " " << Barcode << " " << productName << " " << Productprice << " " << discount << "\n";
+				FRUITY.close();
+			}
+		}
+
+		cout << "\n\n\t\t Record inserted!";
+
+	}
+	void Modify() {
+		fstream FRUITY, FRUITY1;
+		int pkey;
+		int token = 0;
+		int c;
+		float p;
+		float d;
+		string n;
+		float discount;
+
+		cout << "\n\t\t\t Modify the record";
+		cout << "\n\t\t\t fruit code: ";
+		cin >> pkey;
+		FRUITY.open("fruit.txt", ios::in);
+
+		if (!FRUITY) {
+			cout << "\n\nFile doesn't exist! ";
+		}
+		else {
+			FRUITY1.open("fruit1.txt", ios::app | ios::out);
+
+			FRUITY >> Barcode >> productName >> Productprice >> discount;//Extraction opertaion or read
+			while (!FRUITY.eof()) {
+				if (pkey == Barcode) {
+					cout << "\n\t\t\t fruit new code: ";
+					cin >> c;
+					cout << "\n\t\t\t Name of the fruit: ";
+					cin >> n;
+					cout << "\n\t\t\t Price: ";
+					cin >> p;
+					cout << "\n\t\t\t Discount: ";
+					cin >> d;
+					FRUITY1 << " " << c << " " << n << " " << p << " " << d << "\n";
+					cout << "\n\n\t\t Record edited ";
+					token++;
+				}
+				else {
+					FRUITY1 << " " << Barcode << " " << productName << " " << Productprice << " " << discount << "\n";
+				}
+				FRUITY >> Barcode >> productName >> Productprice >> discount;
+			}
+
+			FRUITY.close();
+			FRUITY1.close();
+
+			remove("fruit.txt");
+			rename("fruit1.txt", "fruit.txt");
+
+			if (token == 0) {
+				cout << "\n\n Record not found sorry!";
+			}
+		}
+	}
+	void Delete() {
+		fstream FRUITY, FRUITY1;
+		int pkey;
+		int token = 0;
+		float discount;
+		cout << "\n\n\t Delete fruit";
+		cout << "\n\n\t fruit code: ";
+		cin >> pkey;
+		FRUITY.open("fruit.txt", ios::in);
+
+		if (!FRUITY) {
+			cout << "File doesn't exist";
+		}
+		else {
+			FRUITY1.open("fruit1.txt", ios::app | ios::out);
+			FRUITY >> Barcode >> productName >> Productprice >> discount;
+			while (!FRUITY.eof()) {
+				// Inside the loop, it checks if the Barcode matches the provided pkey.If it does, it displays a success message.Otherwise, it writes the line to database1.txt using data1.
+				if (Barcode == pkey) {
+					cout << "\n\n\t Product deleted successfully";
+					token = 1;;
+				}
+				else {
+					FRUITY1 << " " << Barcode << " " << productName << " " << Productprice << " " << discount << "\n";
+
+				}
+				FRUITY >> Barcode >> productName >> Productprice >> discount;
+			}
+			FRUITY.close();
+			FRUITY1.close();
+			remove("fruit.txt");
+			rename("fruit1.txt", "fruit.txt");
+			if (token == 0) {
+				cout << "\n\n Record not found";
+			}
+		}
+	}
+	void display() {
+		fstream FRUITY;
+		FRUITY.open("fruit.txt", ios::in);
+		cout << "\n\n_________\n";
+		cout << "ProNo\t\tName\t\tPrice\tDiscount\n";
+
+		while (FRUITY >> Barcode >> productName >> Productprice >> discount) {
+			cout << Barcode << "\t\t" << productName << "\t\t" << Productprice << "\t" << discount << "\n";
+		}
+
+		FRUITY.close();
+	}
+
+};
+class meat :public Product, public categories {
+public:
+	int barcode;
+	string Productname;
+	float Productprice;
+	float discount;
+	meat()
+	{
+		Barcode = 0;
+		productName = "";
+		ProductQuantity = 0;
+		Productprice = 0;
+		discount = 0;
+	}
+	meat(int b, string n, float p, int q)
+	{
+		Barcode = b;
+		productName = n;
+		ProductQuantity = q;
+		Productprice = p;
+
+	}
+	void add() {
+		fstream meaty;
+		int c;
+		int token = 0;
+		float p;
+		float d;
+		string n;
+		float discount;
+
+		cout << "\n\n\t\t\t Add new meat";
+		cout << "\n\n\t Product code of the meat: ";
+		cin >> Barcode;
+		cout << "\n\n\t type of meat: ";
+		cin >> productName;
+		cout << "\n\n\t Price of the meat: ";
+		cin >> Productprice;
+		cout << "\n\n\t Discount on meat: ";
+		cin >> discount;
+
+		meaty.open("meat.txt", ios::in);
+
+		if (!meaty) {
+			meaty.open("meat.txt", ios::app | ios::out);
+			meaty << " " << Barcode << " " << productName << " " << Productprice << " " << discount << "\n";
+			meaty.close();
+		}
+		else {
+			meaty >> c >> n >> p >> d;
+			while (!meaty.eof()) {
+				if (c == Barcode || n == productName) {
+					token++;
+				}
+				meaty >> c >> n >> p >> d;
+			}
+
+			meaty.close();
+			if (token == 1) {
+				cout << "\n\n\t\t Product with the same code already exists!";
+				return;
+			}
+			else {
+				meaty.open("meat.txt", ios::app | ios::out);
+				meaty << " " << Barcode << " " << productName << " " << Productprice << " " << discount << "\n";
+				meaty.close();
+			}
+		}
+
+		cout << "\n\n\t\t Record inserted!";
+
+	}
+	void Modify() {
+		fstream meaty, meaty1;
+		int pkey;
+		int token = 0;
+		int c;
+		float p;
+		float d;
+		string n;
+		float discount;
+
+		cout << "\n\t\t\t Modify the record";
+		cout << "\n\t\t\t meat code: ";
+		cin >> pkey;
+		meaty.open("meat.txt", ios::in);
+
+		if (!meaty) {
+			cout << "\n\nFile doesn't exist! ";
+		}
+		else {
+			meaty1.open("meat1.txt", ios::app | ios::out);
+
+			meaty >> Barcode >> productName >> Productprice >> discount;//Extraction opertaion or read
+			while (!meaty.eof()) {
+				if (pkey == Barcode) {
+					cout << "\n\t\t\t meat new code: ";
+					cin >> c;
+					cout << "\n\t\t\t type of meat: ";
+					cin >> n;
+					cout << "\n\t\t\t Price: ";
+					cin >> p;
+					cout << "\n\t\t\t Discount: ";
+					cin >> d;
+					meaty1 << " " << c << " " << n << " " << p << " " << d << "\n";
+					cout << "\n\n\t\t Record edited ";
+					token++;
+				}
+				else {
+					meaty1 << " " << Barcode << " " << productName << " " << Productprice << " " << discount << "\n";
+				}
+				meaty >> Barcode >> productName >> Productprice >> discount;
+			}
+
+			meaty.close();
+			meaty1.close();
+
+			remove("meat.txt");
+			rename("meat1.txt", "meat.txt");
+
+			if (token == 0) {
+				cout << "\n\n Record not found sorry!";
+			}
+		}
+	}
+	void Delete() {
+		fstream meaty, meaty1;
+		int pkey;
+		int token = 0;
+		float discount;
+		cout << "\n\n\t Delete meat";
+		cout << "\n\n\t meat code: ";
+		cin >> pkey;
+		meaty.open("meat.txt", ios::in);
+
+		if (!meaty) {
+			cout << "File doesn't exist";
+		}
+		else {
+			meaty1.open("meat1.txt", ios::app | ios::out);
+			meaty >> Barcode >> productName >> Productprice >> discount;
+			while (!meaty.eof()) {
+				// Inside the loop, it checks if the Barcode matches the provided pkey.If it does, it displays a success message.Otherwise, it writes the line to database1.txt using data1.
+				if (Barcode == pkey) {
+					cout << "\n\n\t Product deleted successfully";
+					token = 1;;
+				}
+				else {
+					meaty1 << " " << Barcode << " " << productName << " " << Productprice << " " << discount << "\n";
+
+				}
+				meaty >> Barcode >> productName >> Productprice >> discount;
+			}
+			meaty.close();
+			meaty1.close();
+			remove("meat.txt");
+			rename("meat1.txt", "meat.txt");
+			if (token == 0) {
+				cout << "\n\n Record not found";
+			}
+		}
+	}
+	void display() {
+		fstream meaty;
+		meaty.open("meat.txt", ios::in);
+		cout << "\n\n________\n";
+		cout << "ProNo\t\tName\t\tPrice\tDiscount\n";
+
+		while (meaty >> Barcode >> productName >> Productprice >> discount) {
+			cout << Barcode << "\t\t" << productName << "\t\t" << Productprice << "\t" << discount << "\n";
+		}
+
+		meaty.close();
+	}
+
+};
+class vegetables :public Product, public categories {
+public:
+	int barcode;
+	string Productname;
+	float Productprice;
+	float discount;
+	vegetables()
+	{
+		Barcode = 0;
+		productName = "";
+		ProductQuantity = 0;
+		Productprice = 0;
+		discount = 0;
+	}
+	vegetables(int b, string n, float p, int q)
+	{
+		Barcode = b;
+		productName = n;
+		ProductQuantity = q;
+		Productprice = p;
+
+	}
+	void add() {
+		fstream veggy;
+		int c;
+		int token = 0;
+		float p;
+		float d;
+		string n;
+		float discount;
+
+		cout << "\n\n\t\t\t Add new vegetable";
+		cout << "\n\n\t Product code of the vegetable: ";
+		cin >> Barcode;
+		cout << "\n\n\t Name of the vegetable: ";
+		cin >> productName;
+		cout << "\n\n\t Price of the vegetable: ";
+		cin >> Productprice;
+		cout << "\n\n\t Discount on vegetable: ";
+		cin >> discount;
+
+		veggy.open("vegetable.txt", ios::in);
+
+		if (!veggy) {
+			veggy.open("vegetable.txt", ios::app | ios::out);
+			veggy << " " << Barcode << " " << productName << " " << Productprice << " " << discount << "\n";
+			veggy.close();
+		}
+		else {
+			veggy >> c >> n >> p >> d;
+			while (!veggy.eof()) {
+				if (c == Barcode || n == productName) {
+					token++;
+				}
+				veggy >> c >> n >> p >> d;
+			}
+
+			veggy.close();
+			if (token == 1) {
+				cout << "\n\n\t\t Product with the same code already exists!";
+				return;
+			}
+			else {
+				veggy.open("vegetable.txt", ios::app | ios::out);
+				veggy << " " << Barcode << " " << productName << " " << Productprice << " " << discount << "\n";
+				veggy.close();
+			}
+		}
+
+		cout << "\n\n\t\t Record inserted!";
+
+	}
+	void Modify() {
+		fstream veggy, veggy1;
+		int pkey;
+		int token = 0;
+		int c;
+		float p;
+		float d;
+		string n;
+		float discount;
+
+		cout << "\n\t\t\t Modify the record";
+		cout << "\n\t\t\t vegetable code: ";
+		cin >> pkey;
+		veggy.open("vegetable.txt", ios::in);
+
+		if (!veggy) {
+			cout << "\n\nFile doesn't exist! ";
+		}
+		else {
+			veggy1.open("vegetable1.txt", ios::app | ios::out);
+
+			veggy >> Barcode >> productName >> Productprice >> discount;//Extraction opertaion or read
+			while (!veggy.eof()) {
+				if (pkey == Barcode) {
+					cout << "\n\t\t\t vegetable new code: ";
+					cin >> c;
+					cout << "\n\t\t\t Name of the vegetable: ";
+					cin >> n;
+					cout << "\n\t\t\t Price: ";
+					cin >> p;
+					cout << "\n\t\t\t Discount: ";
+					cin >> d;
+					veggy1 << " " << c << " " << n << " " << p << " " << d << "\n";
+					cout << "\n\n\t\t Record edited ";
+					token++;
+				}
+				else {
+					veggy1 << " " << Barcode << " " << productName << " " << Productprice << " " << discount << "\n";
+				}
+				veggy >> Barcode >> productName >> Productprice >> discount;
+			}
+
+			veggy.close();
+			veggy1.close();
+
+			remove("vegetable.txt");
+			rename("vegetable1.txt", "vegetable.txt");
+
+			if (token == 0) {
+				cout << "\n\n Record not found sorry!";
+			}
+		}
+	}
+	void Delete() {
+		fstream veggy, veggy1;
+		int pkey;
+		int token = 0;
+		float discount;
+		cout << "\n\n\t Delete vegetable";
+		cout << "\n\n\t vegetable code: ";
+		cin >> pkey;
+		veggy.open("vegetable.txt", ios::in);
+
+		if (!veggy) {
+			cout << "File doesn't exist";
+		}
+		else {
+			veggy1.open("vegetable1.txt", ios::app | ios::out);
+			veggy >> Barcode >> productName >> Productprice >> discount;
+			while (!veggy.eof()) {
+				// Inside the loop, it checks if the Barcode matches the provided pkey.If it does, it displays a success message.Otherwise, it writes the line to database1.txt using data1.
+				if (Barcode == pkey) {
+					cout << "\n\n\t Product deleted successfully";
+					token = 1;;
+				}
+				else {
+					veggy1 << " " << Barcode << " " << productName << " " << Productprice << " " << discount << "\n";
+
+				}
+				veggy >> Barcode >> productName >> Productprice >> discount;
+			}
+			veggy.close();
+			veggy1.close();
+			remove("vegetable.txt");
+			rename("vegetable1.txt", "vegetable.txt");
+			if (token == 0) {
+				cout << "\n\n Record not found";
+			}
+		}
+	}
+	void display() {
+		fstream veggy;
+		veggy.open("vegetable.txt", ios::in);
+		cout << "\n\n________\n";
+		cout << "ProNo\t\tName\t\tPrice\tDiscount\n";
+
+		while (veggy >> Barcode >> productName >> Productprice >> discount) {
+			cout << Barcode << "\t\t" << productName << "\t\t" << Productprice << "\t" << discount << "\n";
+		}
+
+		veggy.close();
+	}
+
+};
+class Administrator :public Product {//CHILD OF PRODUCT
+private:
+	int adminid;
+	string admingmail;
+	string adminpass;
+	float discount;
+
+};
+class Shopping {
+public:
+	virtual void buy(Cart&) = 0;
+};
+
+class Cart : public Product {
+public:
+	static const int cartSize = 50;
+	Product* cart[cartSize];
+	int currentcartindex;
+
+	Cart()
+	{
+		currentcartindex = 0;
+		for (int i = 0; i < cartSize; i++) {
+			cart[i] = nullptr;
+		}
+	}
+
+	void addToCart(Product* product) {
+		if (currentcartindex < cartSize) {
+			cart[currentcartindex] = product;
+			currentcartindex++;
+		}
+		else {
+			cout << "Cart is full. Cannot add more items." << endl;
+		}
+	}
+
+	void removeFromCart(int barcode) {
+		int flag = 0;
+
+		for (int i = 0; i < currentcartindex; i++) {
+			if (cart[i]->Barcode == barcode) {
+				delete cart[i];
+				cart[i] = nullptr;
+				flag = 1;
+				// Shift the subsequent items to fill the gap
+				for (int j = i; j < currentcartindex - 1; j++) {
+					cart[j] = cart[j + 1];
+				}
+
+				cart[currentcartindex - 1] = nullptr;
+				currentcartindex--;
+				break; // Exiting loop since we found the item
+			}
+		}
+		if (flag == 0) {
+			cout << "Invalid product" << endl;
+		}
+	}
+
+
+	void printCart() {
+		cout << "_________\n";
+		cout << "Product No\tProduct Name\tProduct Price\tQuantity\tAmount\tAmount with discount\n";
+		cout << "__________\n";
+
+		float totalAmount = 0.0;
+
+		for (int i = 0; i < currentcartindex; i++) {
+			Product* product = cart[i];
+			float amount = product->Productprice * product->ProductQuantity;
+			float amountWithDiscount = amount - (amount * product->discount / 100);
+			totalAmount += amountWithDiscount;
+			cout << *product;
+		}
+
+		cout << "\n";
+		cout << "Total Amount: " << totalAmount << "\t\t\t\t\t\t\t\n";
+		cout << "\n";
+	}
+
+	~Cart() {
+		for (int i = 0; i < currentcartindex; i++) {
+			delete cart[i];
+			cart[i] = nullptr;
+		}
+	}
+
+};
+
+class shopFruits : public Shopping {
+public:
+	static const int cartSize = 50;
+
+	void buy(Cart& a) override
+	{
+		fstream FRUITY;
+		char choice = 'y';
+		int pkey;
+		float discount;
+		cout << "\nEnter Product code: ";
+		cin >> pkey;
+
+		FRUITY.open("fruit.txt", ios::in);
+		Product p;
+		bool found = false;
+
+		if (!FRUITY) {
+			cout << "\n\nFile doesn't exist! ";
+		}
+		else {
+			while (FRUITY >> p.Barcode >> p.productName >> p.Productprice >> p.discount) {
+				if (pkey == p.Barcode) {
+					found = true;
+					break;
+				}
+			}
+			FRUITY.close();
+
+			if (found) {
+				int quantity;
+				cout << "\nEnter the product quantity: ";
+				cin >> quantity;
+				Product* product = new Product(p.Barcode, p.productName, quantity, p.Productprice, p.discount);
+				a.addToCart(product);
+			}
+			else
+			{
+				cout << "Product not found!\n";
+			}
+		}
+	}
+};
+class shopvegetables : public Shopping {
+public:
+	static const int cartSize = 50;
+
+	void buy(Cart& a) override {
+		fstream veggy;
+		int pkey;
+		float discount;
+
+		cout << "\nEnter Product code: ";
+		cin >> pkey;
+
+		veggy.open("vegetable.txt", ios::in);
+		Product p;
+		bool found = false;
+
+		if (!veggy) {
+			cout << "\n\nFile doesn't exist! ";
+		}
+		else {
+			while (veggy >> p.Barcode >> p.productName >> p.Productprice >> p.discount) {
+				if (pkey == p.Barcode) {
+					found = true;
+					break;
+				}
+			}
+			veggy.close();
+
+			if (found) {
+				int quantity;
+				cout << "\nEnter the product quantity: ";
+				cin >> quantity;
+				Product* product = new Product(p.Barcode, p.productName, quantity, p.Productprice, p.discount);
+				a.addToCart(product);
+			}
+			else
+			{
+				cout << "Product not found!\n";
+			}
+		}
+	}
+};
+class shopmeat : public Shopping {
+public:
+	static const int cartSize = 50;
+
+	void buy(Cart& a) override
+	{
+		fstream meaty;
+		int pkey;
+		float discount;
+
+		cout << "\nEnter Product code: ";
+		cin >> pkey;
+
+		meaty.open("meat.txt", ios::in);
+		Product p;
+		bool found = false;
+
+		if (!meaty)
+		{
+			cout << "\n\nFile doesn't exist! ";
+		}
+		else
+		{
+			while (meaty >> p.Barcode >> p.productName >> p.Productprice >> p.discount) {
+				if (pkey == p.Barcode) {
+					found = true;
+					break;
+				}
+			}
+			meaty.close();
+
+			if (found) {
+				int quantity;
+				cout << "\nEnter the product quantity: ";
+				cin >> quantity;
+				Product* product = new Product(p.Barcode, p.productName, quantity, p.Productprice, p.discount);
+				a.addToCart(product);
+			}
+			else
+			{
+				cout << "Product not found!\n";
+			}
+		}
+	}
+};
+
+int delorcheck()
+{
+	int c;
+	cout << "\n\t\t\t____________________________";
+	cout << "\n\t\t\t|     1)   Shop more        |";
+	cout << "\n\t\t\t|___________________________|";
+	cout << "\n\t\t\t|     2)  Delete Product    |";
+	cout << "\n\t\t\t|___________________________|";
+	cout << "\n\t\t\t|     3)   Checkout         |";
+	cout << "\n\t\t\t|___________________________|";
+	cout << "\n\t\t\t|     4)   Go Back          |";
+	cout << "\n\t\t\t|___________________________|";
+	cout << "\nSelect an option";
+	cin >> c;
+	return c;
+}
+void happyshopping()
+{
+	cout << "\t\t\t\t\t\t\t\t**********************************************************\n";
+	cout << "\t\t\t\t\t\t\t\t                                                          \n";
+	cout << "\t\t\t\t\t\t\t\t                    HAPPY SHOPPING!!!!                    \n";
+	cout << "\t\t\t\t\t\t\t\t                                                          \n";
+	cout << "\t\t\t\t\t\t\t\t**********************************************************\n";
+}
+class Superstore;
+class customer : public fruits, public vegetables, public meat, public Cart
+{
+	Shopping* cart;
+	friend class Superstore;
+
+public:
+	Cart bag;
+	void startCustomerMode()
+	{
+		int choice = 1;
+		while (choice == 1)
+		{
+			int c;
+			cout << "\n\t\t\t____________________________";
+			cout << "\n\t\t\t|     1) Buy fruits         |";
+			cout << "\n\t\t\t|___________________________|";
+			cout << "\n\t\t\t|     2) Buy vegetables     |";
+			cout << "\n\t\t\t|___________________________|";
+			cout << "\n\t\t\t|     3) Buy meat           |";
+			cout << "\n\t\t\t|___________________________|";
+			cout << "\n\t\t\t|     4) Go Back            |";
+			cout << "\n\t\t\t|___________________________|";
+			cout << endl;
+			cout << "\nChoose category to shop: ";
+			cin >> c;
+			cout << "BUYER MODE STARTED" << endl;
+
+			fruits f;
+			vegetables v;
+			meat m;
+			if (c == 1)
+			{
+				f.display();
+				shopFruits shop;
+				shop.buy(bag);
+				choice = delorcheck();
+				m:
+				if (choice == 1)
+				{
+					continue;
+				}
+				if (choice == 2)
+				{
+					int code;
+					cout << "Enter product code to delete: ";
+					cin >> code;
+					bag.removeFromCart(code);
+					bag.printCart();
+					choice = delorcheck();
+					goto m;
+				}
+				if (choice == 3)
+				{
+					bag.printCart();
+					happyshopping();
+				}
+				else if (choice == 4)
+				{
+					start();
+				}
+				else
+				{
+					cout << "Invalid choice" << endl;
+					continue;
+				}
+			}
+			else if (c == 2)
+			{
+				v.display();
+				shopvegetables shop;
+				shop.buy(bag);
+				choice = delorcheck();
+				a:
+				if (choice == 1)
+				{
+					continue;
+				}
+				if (choice == 2)
+				{
+					int code;
+					cout << "Enter product code to delete: ";
+					cin >> code;
+					bag.removeFromCart(code);
+					bag.printCart();
+					choice = delorcheck();
+					goto a;
+				}
+				if (choice == 3)
+				{
+					bag.printCart();
+					happyshopping();
+				}
+				else if (choice == 4)
+				{
+					start();
+				}
+				else
+				{
+					cout << "Invalid choice" << endl;
+					continue;
+				}
+			}
+			else if (c == 3)
+			{
+				m.display();
+				shopmeat shop;
+				shop.buy(bag);
+				choice = delorcheck();
+				b:
+				if (choice == 1)
+				{
+					continue;
+				}
+				else if (choice == 2)
+				{
+					int code;
+					cout << "Enter product code to delete: ";
+					cin >> code;
+					bag.removeFromCart(code);
+					choice = delorcheck();
+					goto b;
+				}
+				else if (choice == 3)
+				{
+					bag.printCart();
+					happyshopping();
+				}
+				else if (choice == 4)
+				{
+					start();
+				}
+				else
+				{
+					cout << "Invalid choice" << endl;
+					continue;
+				}
+			}
+			else if (c == 4)
+			{
+				start();
+			}
+		}
+	}
+
+};
+
+
+class Superstore {
+public:
+	friend class Administrator;
+	friend class customer;
+	friend class fruits;
+	friend class vegetables;
+
+	bool email()
+	{
+		string email;
+		string password;
+		cout << "\t\t\t Please Login \n";
+		cout << "\t\t\t Enter Email: ";
+		cin >> email;
+		cout << "\t\t\t Password: ";
+		cin >> password;
+
+		if (email == "admin@gmail.com" && password == "admin1234") {
+			cout << "\n\t\t\t Administrator Mode Started\n";
+			return true;
+		}
+		else {
+			cout << "\n\t\t\t Invalid email or password. Access denied.\n";
+			return false;
+		}
+	}
+	int adminchoice()
+	{
+		int choice;
+		cout << "\n\n\n\t\t\t     ADMINISTRATOR MODE";
+		cout << "\n\t\t\t___________________________________";
+		cout << "\n\t\t\t|     1) Add the product          |";
+		cout << "\n\t\t\t|_________________________________|";
+		cout << "\n\t\t\t|     2) Modify the product       |";
+		cout << "\n\t\t\t|_________________________________|";
+		cout << "\n\t\t\t|     3) Delete the product       |";
+		cout << "\n\t\t\t|_________________________________|";
+		cout << "\n\t\t\t|     4) View the product         |";
+		cout << "\n\t\t\t|_________________________________|";
+		cout << "\n\t\t\t|     5) Back to main menu        |";
+		cout << "\n\t\t\t|_________________________________|";
+		cout << endl;
+		cout << "\n\n\t Please enter your choice ";
+		cin >> choice;
+		return choice;
+	}
+	void startAdministratorMode() {
+		{
+			if (email() == 1)
+			{
+				int r = 0;
+				while (r != 5)
+				{
+					r = adminchoice();
+					Administrator admin;
+					fruits f;
+					vegetables v;
+					meat m;
+
+					if (r == 1) {
+						int c;
+						cout << "\n\t\t\t___________________________";
+						cout << "\n\t\t\t|    1) Add fruits        |";
+						cout << "\n\t\t\t|_________________________|";
+						cout << "\n\t\t\t|   2) Add vegetables     |";
+						cout << "\n\t\t\t|_________________________|";
+						cout << "\n\t\t\t|   3) Add meat           |";
+						cout << "\n\t\t\t|_________________________|";
+						cout << endl;
+
+						cout << "\nChoose category to add product: ";
+						cin >> c;
+						if (c == 1)
+							f.add();
+						else if (c == 2)
+							v.add();
+						else if (c == 3)
+							m.add();
+						else
+							cout << "invalid choice" << endl;
+
+					}
+					else if (r == 2) {
+						int c;
+						cout << "\n\t\t\t___________________________";
+						cout << "\n\t\t\t|1) Modify fruits         |";
+						cout << "\n\t\t\t|_________________________|";
+						cout << "\n\t\t\t|_2) Modify vegetables    |";
+						cout << "\n\t\t\t|_________________________|";
+						cout << "\n\t\t\t|_3) Modify meat          |";
+						cout << "\n\t\t\t|_________________________|";
+						cout << endl;
+						cout << "\nChoose category to modify product: ";
+						cin >> c;
+						if (c == 1)
+							f.Modify();
+						else if (c == 2)
+							v.Modify();
+						else if (c == 3)
+							m.Modify();
+						else
+							cout << "invalid choice" << endl;
+
+					}
+					else if (r == 3) {
+						int c;
+						cout << "\n\t\t\t___________________________";
+						cout << "\n\t\t\t|    1) Delete fruits     |";
+						cout << "\n\t\t\t|_________________________|";
+						cout << "\n\t\t\t|    2) Delete vegetables |";
+						cout << "\n\t\t\t|_________________________|";
+						cout << "\n\t\t\t|    3) Delete meat       |";
+						cout << "\n\t\t\t|_________________________|";
+						cout << endl;
+						cout << "\nChoose category to delete product: ";
+						cin >> c;
+						if (c == 1)
+							f.Delete();
+						else if (c == 2)
+							v.Delete();
+						else if (c == 3)
+							m.Delete();
+						else
+							cout << "invalid choice" << endl;
+					}
+					else if (r == 4) {
+						int c;
+						cout << "\n\t\t\t_________________________";
+						cout << "\n\t\t\t|1) View fruits         |";
+						cout << "\n\t\t\t|_______________________|";
+						cout << "\n\t\t\t|2) View vegetables     |";
+						cout << "\n\t\t\t|_______________________|";
+						cout << "\n\t\t\t|3) View meat           |";
+						cout << "\n\t\t\t|_______________________|";
+						cout << endl;
+						cout << "\nChoose category to view: ";
+						cin >> c;
+						if (c == 1)
+							f.display();
+						else if (c == 2)
+							v.display();
+						else if (c == 3)
+							m.display();
+						else
+							cout << "invalid choice" << endl;
+					}
+					else if (r == 5) {
+						start();
+					}
+					else {
+						cout << "Invalid choice!";
+					}
+				}
+			}
+			else
+				start();
+		}
+	}
+};
+void start() {//show menu
+	cout << "\t\t\t\t\t\t\t\t*******************************************************************\n";
+	cout << "\t\t\t\t\t\t\t\t                                                                   \n";
+	cout << "\t\t\t\t\t\t\t\t                    SUPERSTORE MAIN MENU                           \n";
+	cout << "\t\t\t\t\t\t\t\t                                                                   \n";
+	cout << "\t\t\t\t\t\t\t\t*******************************************************************\n";
+	cout << "\t\t\t\t\t\t\t\t                                                                   \n";
+	cout << "\t\t\t\t\t\t\t\t|                    1) ADMINISTRATOR                              |\n";
+	cout << "\t\t\t\t\t\t\t\t|                                                                  |\n";
+	cout << "\t\t\t\t\t\t\t\t|                    2) BUYER                                      |\n";
+	cout << "\t\t\t\t\t\t\t\t|                                                                  |\n";
+	cout << "\t\t\t\t\t\t\t\t|                    3) EXIT                                       |\n";
+	cout << "\t\t\t\t\t\t\t\t|                                                                  |\n";
+	cout << "\t\t\t\t\t\t\t\t*******************************************************************\n";
+	cout << endl;
+	cout << "\n\t\t\t\t PLEASE SELECT ";
+
+	int mode;
+	cin >> mode;
+	customer c;
+	Superstore s;
+	if (mode == 1) {
+		s.startAdministratorMode();
+	}
+	else if (mode == 2) {
+		c.startCustomerMode();
+	}
+
+	else {
+		cout << "Invalid mode selected." << endl;
+	}
+}

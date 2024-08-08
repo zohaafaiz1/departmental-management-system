@@ -1,0 +1,6 @@
+ 1234 chicken 300 20
+ 2345 fish 400 25
+ 3456 beef 350 14
+ 4567 lamb 1000 10
+ 5678 sausage 2000 20
+ 6789 seafood 3000 25
